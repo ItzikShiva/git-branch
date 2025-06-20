@@ -35,6 +35,7 @@ class BranchBase(BaseModel):
     tags: List[str] = []
     notes: Optional[str] = None
     archived: bool = False
+    watched: bool = False
 
     @field_validator('tags', mode='before')
     @classmethod
@@ -56,6 +57,7 @@ class BranchUpdate(BaseModel):
     tags: Optional[List[str]] = None
     notes: Optional[str] = None
     archived: Optional[bool] = None
+    watched: Optional[bool] = None
 
 class Branch(BranchBase):
     id: int

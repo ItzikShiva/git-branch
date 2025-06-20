@@ -28,6 +28,8 @@ import {
   Refresh,
   Edit,
   Archive,
+  Star,
+  StarBorder
 } from '@mui/icons-material';
 import { fetchRepositoryBranches, updateBranch, archiveBranch, RepositoryBranches, Branch } from '../services/api';
 
@@ -70,6 +72,31 @@ const BranchDetails: React.FC = () => {
       notes: branch.notes || '',
     });
     setEditDialog({ open: true, branch });
+  };
+
+  const handleEditClick = (branch: Branch) => {
+    setEditData({
+      tags: Array.isArray(branch.tags) ? branch.tags.join(', ') : '',
+      notes: branch.notes || '',
+    });
+    setEditDialog({ open: true, branch });
+  };
+
+  const handleToggleWatched = async (branch: Branch) => {
+    try {
+      const updatedBranch = await updateBranch(branch.id, { watched: !branch.watched });
+      setData(prevData => {
+        if (!prevData) return null;
+        return {
+          ...prevData,
+          branches: prevData.branches.map(b => b.id === updatedBranch.id ? updatedBranch : b),
+        };
+      });
+      setSnackbar({ open: true, message: `Branch ${updatedBranch.watched ? 'watched' : 'unwatched'}.` });
+    } catch (error) {
+      console.error('Failed to toggle watch status', error);
+      setSnackbar({ open: true, message: 'Failed to update watch status.' });
+    }
   };
 
   const handleSaveBranch = async () => {
@@ -215,22 +242,23 @@ const BranchDetails: React.FC = () => {
                   />
                 </TableCell>
                 <TableCell>
-                  {branch.pr_url ? (
-                    <Link href={branch.pr_url} target="_blank" rel="noopener">
-                      <Chip
-                        label={branch.pr_state}
-                        size="small"
-                        clickable
-                        color={
-                          branch.pr_state === 'open' ? 'success' :
-                          branch.pr_state === 'merged' ? 'info' :
-                          branch.pr_state === 'draft' ? 'warning' : 'default'
-                        }
-                      />
-                    </Link>
-                  ) : (
-                    '-'
-                  )}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    {branch.has_pr && (
+                      <Link href={branch.pr_url || '#'} target="_blank" rel="noopener">
+                        <Chip
+                          label={branch.pr_state}
+                          size="small"
+                          color={
+                            branch.pr_state === 'open'
+                              ? 'success'
+                              : branch.pr_state === 'merged'
+                              ? 'secondary'
+                              : 'default'
+                          }
+                        />
+                      </Link>
+                    )}
+                  </Box>
                 </TableCell>
                 <TableCell>
                   {branch.tags && Array.isArray(branch.tags) && branch.tags.length > 0 ? (
@@ -247,22 +275,20 @@ const BranchDetails: React.FC = () => {
                   ) : null}
                 </TableCell>
                 <TableCell>
-                  <Box display="flex" gap={0.5}>
-                    <Tooltip title="Edit">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEditBranch(branch)}
-                      >
-                        <Edit fontSize="small" />
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Tooltip title="Edit Notes/Tags">
+                      <IconButton onClick={() => handleEditClick(branch)}>
+                        <Edit />
                       </IconButton>
                     </Tooltip>
-                     <Tooltip title="Archive">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleArchiveBranch(branch)}
-                        disabled={branch.archived}
-                      >
-                        <Archive fontSize="small" />
+                    <Tooltip title="Archive Branch">
+                      <IconButton onClick={() => handleArchiveBranch(branch)}>
+                        <Archive />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={branch.watched ? 'Unwatch Branch' : 'Watch Branch'}>
+                      <IconButton onClick={() => handleToggleWatched(branch)}>
+                        {branch.watched ? <Star sx={{ color: '#ffc107' }} /> : <StarBorder />}
                       </IconButton>
                     </Tooltip>
                   </Box>

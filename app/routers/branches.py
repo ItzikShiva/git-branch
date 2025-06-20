@@ -10,6 +10,12 @@ import json
 
 router = APIRouter()
 
+@router.get("/branches/watched", response_model=List[BranchSchema])
+async def get_watched_branches(db: Session = Depends(get_db)):
+    """Get all watched branches"""
+    watched_branches = db.query(BranchModel).filter(BranchModel.watched == True, BranchModel.archived == False).all()
+    return watched_branches
+
 @router.get("/branches", response_model=List[RepositoryBranchesResponse])
 async def get_all_branches(db: Session = Depends(get_db)):
     """Get branches from all repositories"""
@@ -71,16 +77,14 @@ async def update_branch(
             detail="Branch not found"
         )
     
-    # Update fields
-    if branch_update.status is not None:
-        branch.status = branch_update.status
-    if branch_update.tags is not None:
-        branch.tags = json.dumps(branch_update.tags)
-    if branch_update.notes is not None:
-        branch.notes = branch_update.notes
-    if branch_update.archived is not None:
-        branch.archived = branch_update.archived
-    
+    update_data = branch_update.model_dump(exclude_unset=True)
+
+    if 'tags' in update_data and update_data['tags'] is not None:
+        update_data['tags'] = json.dumps(update_data['tags'])
+
+    for key, value in update_data.items():
+        setattr(branch, key, value)
+
     db.commit()
     db.refresh(branch)
     

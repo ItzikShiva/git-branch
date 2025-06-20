@@ -6,8 +6,8 @@ import {
   Button,
   Box,
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
-import { GitHub, Dashboard, Storage } from '@mui/icons-material';
+import { GitHub } from '@mui/icons-material';
+import { NavLink } from 'react-router-dom';
 
 const Header: React.FC = () => {
   return (
@@ -15,24 +15,17 @@ const Header: React.FC = () => {
       <Toolbar>
         <GitHub sx={{ mr: 2 }} />
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          GitStatus Branch Management
+          GitStatus
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            color="inherit"
-            component={RouterLink}
-            to="/"
-            startIcon={<Dashboard />}
-          >
+        <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+          <Button component={NavLink} to="/dashboard" sx={{ my: 2, color: 'white', display: 'block' }}>
             Dashboard
           </Button>
-          <Button
-            color="inherit"
-            component={RouterLink}
-            to="/repositories"
-            startIcon={<Storage />}
-          >
+          <Button component={NavLink} to="/repos" sx={{ my: 2, color: 'white', display: 'block' }}>
             Repositories
+          </Button>
+          <Button component={NavLink} to="/watched" sx={{ my: 2, color: 'white', display: 'block' }}>
+            Watched Branches
           </Button>
         </Box>
       </Toolbar>

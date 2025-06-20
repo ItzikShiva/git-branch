@@ -24,6 +24,7 @@ export interface Branch {
   tags: string[];
   notes: string | null;
   archived: boolean;
+  watched: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -84,6 +85,7 @@ export const updateBranch = async (branchId: number, updates: {
   tags?: string[];
   notes?: string;
   archived?: boolean;
+  watched?: boolean;
 }): Promise<Branch> => {
   const response = await api.put(`/branches/${branchId}`, updates);
   return response.data;
@@ -98,4 +100,9 @@ export const archiveBranch = async (branchId: number): Promise<Branch> => {
 // Delete a repository
 export const deleteRepository = async (repoId: number): Promise<void> => {
   await api.delete(`/repos/${repoId}`);
+};
+
+export const fetchWatchedBranches = async (): Promise<Branch[]> => {
+  const response = await api.get('/branches/watched');
+  return response.data;
 }; 

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text, Foreign
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
+from datetime import datetime
 
 class Repository(Base):
     __tablename__ = "repositories"
@@ -32,11 +33,12 @@ class Branch(Base):
     has_pr = Column(Boolean, default=False)
     pr_state = Column(String, nullable=True)  # open, closed, merged, draft
     pr_url = Column(String, nullable=True)
-    tags = Column(Text, nullable=True)  # JSON string of tags
-    notes = Column(Text, nullable=True)
+    tags = Column(String, default="[]")
+    notes = Column(String, nullable=True)
     archived = Column(Boolean, default=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    watched = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationship
     repository = relationship("Repository", back_populates="branches")
